@@ -631,8 +631,10 @@ MonoBehaviour:
   startPosition: {x: 0, y: 0, z: 0}
   lMin: 1
   lMax: 3
-  iterMax: 50
-  nbTilesMax: 100
+  iterMax: 1000
+  nbTilesMax: 400
+  heightMax: 20
+  widhttMax: 40
 --- !u!4 &1371114360
 Transform:
   m_ObjectHideFlags: 0
