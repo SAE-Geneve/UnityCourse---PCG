@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,7 @@ public class GeneratorPCG : MonoBehaviour
     [SerializeField] private int iterMax;
     [SerializeField] private int nbTilesMax;
     [SerializeField] private int heightMax;
-    [FormerlySerializedAs("widhttMax")] [SerializeField] private int widthMax;
+    [SerializeField] private int widthMax;
 
     [Header("Game of life limits")]
     [SerializeField] private int deadLimitMax;
@@ -27,14 +28,15 @@ public class GeneratorPCG : MonoBehaviour
     [SerializeField] private int aliveLimit;
     [SerializeField] private int fillIterations;
 
+    // private bool _generationDone = true;
+    private Coroutine _generationCo = null;
 
-
-    private Vector2Int[] _directions = new[]
+    private readonly Vector2Int[] _directions = new[]
     {
         Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left
     };
 
-    private Vector3Int[] _mooreNeighbours = new[]
+    private readonly Vector3Int[] _mooreNeighbours = new[]
     {
         new Vector3Int(0, 1, 0),
         new Vector3Int(1, 1, 0),
@@ -52,8 +54,7 @@ public class GeneratorPCG : MonoBehaviour
     void Start()
     {
         SetBarrier();
-
-        StartCoroutine("Generate");
+        StartGenerateCoroutines();
     }
 
     private void OnDrawGizmos()
@@ -65,12 +66,27 @@ public class GeneratorPCG : MonoBehaviour
         Gizmos.DrawWireCube(_barrier.center, _barrier.size);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void StartGenerateCoroutines()
     {
-
+        if (_generationCo != null)
+            StopCoroutine(_generationCo);
+        
+        _generationCo = StartCoroutine(nameof(GenerateCo));
+        
     }
+    
+    private void GenerateCo()
+    {
+        map.ClearAllTiles();
+        
+        Debug.Log("Generate Drunkard");
+        GenerateDrunkard();
 
+        Debug.Log("Generate Fill");
+        GenerateFillWithLife();
+
+
+    }    
     private void SetBarrier()
     {
 
@@ -81,29 +97,20 @@ public class GeneratorPCG : MonoBehaviour
         _barrier = new BoundsInt(boundsPosition, size);
     }
 
-    private IEnumerator Generate()
+
+
+    private void GenerateDrunkard()
     {
-        Debug.Log("Generate Drunkard");
-        yield return GenerateDrunkard();
-
-        Debug.Log("Generate Fill");
-        yield return GenerateFillWithLife();
-
-    }
-
-    private IEnumerator GenerateDrunkard()
-    {
-        Vector2Int direction = Vector2Int.zero;
-        Vector3Int position = Vector3Int.zero;
-
+        ;
         int tileCount = 0;
         int iterCount = 0;
 
-        AddTile(startPosition, ref tileCount);
+        Vector3Int position = startPosition;
+        AddTile(position, ref tileCount);
 
         while (tileCount < nbTilesMax && iterCount < iterMax)
         {
-            direction = _directions[Random.Range(0, _directions.Length)];
+            Vector2Int direction = _directions[Random.Range(0, _directions.Length)];
             int currentPathLength = Random.Range(lMin, lMax);
 
             Vector3Int futurePosition = position + currentPathLength * new Vector3Int(direction.x, direction.y, 0);
@@ -119,15 +126,14 @@ public class GeneratorPCG : MonoBehaviour
                 iterCount++;
 
             }
-
-            yield return new WaitForSeconds(0.01f);
+            
             Debug.Log($"Tile Count {tileCount} : Iter Count {iterCount}");
 
         }
 
     }
 
-    private IEnumerator GenerateFillWithLife()
+    private void GenerateFillWithLife()
     {
 
         // l’état des cases est évalué 
@@ -219,7 +225,6 @@ public class GeneratorPCG : MonoBehaviour
 
             //  il y a plus rien qui bouge
             Debug.Log($"Game of life : Fill iteration {nbIter}");
-            yield return new WaitForSeconds(0.01f);
             
         }
         
