@@ -629,12 +629,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 903676c3e933f8e448e3ba7d5340913a, type: 2}
   - {fileID: 11400000, guid: 777449c4b8df1be4190639329aefdb32, type: 2}
   startPosition: {x: 0, y: 0, z: 0}
-  lMin: 1
-  lMax: 3
+  lMin: 2
+  lMax: 4
   iterMax: 1000
   nbTilesMax: 400
-  heightMax: 20
-  widhttMax: 40
+  heightMax: 1000
+  widthMax: 1000
+  deadLimitMax: 5
+  deadLimitMin: 2
+  aliveLimit: 1
+  fillIterations: 7
 --- !u!4 &1371114360
 Transform:
   m_ObjectHideFlags: 0

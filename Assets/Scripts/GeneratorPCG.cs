@@ -19,8 +19,13 @@ public class GeneratorPCG : MonoBehaviour
     [SerializeField] private int iterMax;
     [SerializeField] private int nbTilesMax;
     [SerializeField] private int heightMax;
-    [SerializeField] private int widhttMax;
+    [FormerlySerializedAs("widhttMax")] [SerializeField] private int widthMax;
 
+    [Header("Game of life limits")]
+    [SerializeField] private int deadLimitMax;
+    [SerializeField] private int deadLimitMin;
+    [SerializeField] private int aliveLimit;
+    [SerializeField] private int fillIterations;
 
 
 
@@ -69,7 +74,7 @@ public class GeneratorPCG : MonoBehaviour
     private void SetBarrier()
     {
 
-        Vector3Int size = new Vector3Int(widhttMax, heightMax, 0);
+        Vector3Int size = new Vector3Int(widthMax, heightMax, 0);
         // Vector3Int boundsPosition = new Vector3Int(startPosition.x + widhttMax / 2, startPosition.y + heightMax / 2, 0);
         Vector3Int boundsPosition = startPosition - size / 2;
 
@@ -80,9 +85,6 @@ public class GeneratorPCG : MonoBehaviour
     {
         Debug.Log("Generate Drunkard");
         yield return GenerateDrunkard();
-
-        Debug.Log("Wait");
-        yield return new WaitForSeconds(1);
 
         Debug.Log("Generate Fill");
         yield return GenerateFillWithLife();
@@ -137,90 +139,90 @@ public class GeneratorPCG : MonoBehaviour
         List<Vector3Int> aliveCells = new List<Vector3Int>();
         List<Vector3Int> deadCells = new List<Vector3Int>();
 
-        // Parcourir le rectangle
-        for (int x = _barrier.xMin; x < _barrier.xMax; x++)
+        for(int nbIter = 0; nbIter < fillIterations; nbIter++)
         {
-            for (int y = _barrier.yMin; y < _barrier.yMax; y++)
+            
+            aliveCells.Clear();
+            deadCells.Clear();
+            
+            // Parcourir le rectangle
+            for (int x = _barrier.xMin; x < _barrier.xMax; x++)
             {
-                //Debug.Log($"x={x} : y={y} : {map.GetTile(new Vector3Int(x, y))}");
-
-                Vector3Int position = new Vector3Int(x, y);
-
-                // check if cell is dead or alive
-                bool isAlive = map.HasTile(position);
-
-                // check how many neighbours are dead or alive
-                int countAlive = 0;
-                foreach (Vector3Int neighbour in _mooreNeighbours)
+                for (int y = _barrier.yMin; y < _barrier.yMax; y++)
                 {
-                    if (IsInBounds(position + neighbour))
+                    //Debug.Log($"x={x} : y={y} : {map.GetTile(new Vector3Int(x, y))}");
+
+                    Vector3Int position = new Vector3Int(x, y);
+
+                    // check if cell is dead or alive
+                    bool isAlive = map.HasTile(position);
+
+                    // check how many neighbours are dead or alive
+                    int countAlive = 0;
+                    foreach (Vector3Int neighbour in _mooreNeighbours)
                     {
-                        TileBase t = map.GetTile(position + neighbour);
-                        if (t != null)
+                        if (IsInBounds(position + neighbour))
                         {
-                            // il y a bien une tile a cet emplacement
-                            countAlive++;
+                            TileBase t = map.GetTile(position + neighbour);
+                            if (t != null)
+                            {
+                                // il y a bien une tile a cet emplacement
+                                countAlive++;
+                            }
                         }
                     }
-                }
 
-                if (isAlive)
-                {
-                    
-                    
-                    if (countAlive > 3 || countAlive < 2)
+                    if (isAlive)
                     {
-                        // Elle meurt
-                        deadCells.Add(position);
-                    }else
-                    {
-                        aliveCells.Add(position);
-                        // Sinon Elle reste en vie
-                    }
-                    
-                }
-                else
-                {
-                    // Elle est morte
-                    if (countAlive == 3)
-                    {
-                        // Elle devient vivante
-                        // map.SetTile(position, GetRandomTile());
-                        
-                        aliveCells.Add(position);
+                        // if (countAlive > deadLimitMax || countAlive < deadLimitMin)
+                        // {
+                        //     // Elle meurt
+                        //     deadCells.Add(position);
+                        // }
+                        // else
+                        // {
+                        //     aliveCells.Add(position);
+                        //     // Sinon Elle reste en vie
+                        // }
                     }
                     else
                     {
-                        // sinon Elle reste morte
-                        deadCells.Add(position);
+                        // Elle est morte
+                        if (countAlive >= aliveLimit + nbIter)
+                        {
+                            // Elle devient vivante
+                            aliveCells.Add(position);
+                        }
+                        else
+                        {
+                            // sinon Elle reste morte
+                            deadCells.Add(position);
+                        }
                     }
                 }
-
-
-                
             }
-        }
 
-        foreach (Vector3Int aliveCell in aliveCells)
-        {
-            if(!map.HasTile(aliveCell)) map.SetTile(aliveCell, GetRandomTile());
+            foreach (Vector3Int aliveCell in aliveCells)
+            {
+                if (!map.HasTile(aliveCell)) map.SetTile(aliveCell, GetRandomTile());
+            }
+            foreach (Vector3Int deadCell in deadCells)
+            {
+                if (map.HasTile(deadCell)) map.SetTile(deadCell, null);
+            }
+
+            // debut boucle
+            // Compter les voisins de chaque case
+            // si les conditions sont bonnes => on met une nouvelle tile
+            // si les conditions sont pas bonnes => on met une nouvelle tile
+            // fin boucle
+
+            //  il y a plus rien qui bouge
+            Debug.Log($"Game of life : Fill iteration {nbIter}");
             yield return new WaitForSeconds(0.01f);
-        }
-        foreach (Vector3Int deadCell in deadCells)
-        {
-            if(map.HasTile(deadCell)) map.SetTile(deadCell, null);
-            yield return new WaitForSeconds(0.01f);
+            
         }
         
-        // debut boucle
-        // Compter les voisins de chaque case
-        // si les conditions sont bonnes => on met une nouvelle tile
-        // si les conditions sont pas bonnes => on met une nouvelle tile
-        // fin boucle
-
-        //  il y a plus rien qui bouge
-
-
     }
 
     private void AddTile(Vector3Int position, ref int count)
