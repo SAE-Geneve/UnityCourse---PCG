@@ -308,7 +308,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemap_packed_9
+      name: OpenDoorSimple
       rect:
         serializedVersion: 2
         x: 144
@@ -968,7 +968,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tilemap_packed_39
+      name: Stairs
       rect:
         serializedVersion: 2
         x: 48
@@ -3028,8 +3028,10 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       Ground: 1891549318
+      OpenDoorSimple: -1365936267
       Pavement: -1202042289
       Sand: 1328697644
+      Stairs: -1440704465
       WallBottom: -2138597666
       WallLeft: 1668074033
       WallRight: -1929526890
@@ -3095,7 +3097,6 @@ TextureImporter:
       tilemap_packed_36: -961361818
       tilemap_packed_37: -670027374
       tilemap_packed_38: -405355878
-      tilemap_packed_39: -1440704465
       tilemap_packed_4: 1472095770
       tilemap_packed_40: 1093469388
       tilemap_packed_41: 1381027103
@@ -3148,7 +3149,6 @@ TextureImporter:
       tilemap_packed_87: -2102980945
       tilemap_packed_88: -1143580368
       tilemap_packed_89: -1267545317
-      tilemap_packed_9: -1365936267
       tilemap_packed_90: 1351227580
       tilemap_packed_91: -1912590972
       tilemap_packed_92: -61476671
